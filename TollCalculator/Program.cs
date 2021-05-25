@@ -2,6 +2,7 @@
 using CommercialRegistration;
 using ConsumerVehicleRegistration;
 using LiveryRegistration;
+using TollCalculator.Repository;
 
 namespace toll_calculator
 {
@@ -9,7 +10,9 @@ namespace toll_calculator
     {
         static void Main(string[] args)
         {
-            var tollCalc = new TollCalculator();
+            var tollCalcPremiumFall = new TollCalculator(new PeakTimePremiumFullRepository());
+            var tollCalcPremium = new TollCalculator(new PeakTimePremiumRepository());
+            var tollCalcPremiumIfElse = new TollCalculator(new RepositoryPeakTimePremiumIfElseRepository());
 
             var soloDriver = new Car();
             var twoRideShare = new Car { Passengers = 1 };
@@ -27,27 +30,27 @@ namespace toll_calculator
             var truck = new DeliveryTruck { GrossWeightClass = 4000 };
             var lightTruck = new DeliveryTruck { GrossWeightClass = 2500 };
 
-            Console.WriteLine($"The toll for a solo driver is {tollCalc.CalculateToll(soloDriver)}");
-            Console.WriteLine($"The toll for a two ride share is {tollCalc.CalculateToll(twoRideShare)}");
-            Console.WriteLine($"The toll for a three ride share is {tollCalc.CalculateToll(threeRideShare)}");
-            Console.WriteLine($"The toll for a fullVan is {tollCalc.CalculateToll(fullVan)}");
+            Console.WriteLine($"The toll for a solo driver is {tollCalcPremium.CalculateToll(soloDriver)}");
+            Console.WriteLine($"The toll for a two ride share is {tollCalcPremium.CalculateToll(twoRideShare)}");
+            Console.WriteLine($"The toll for a three ride share is {tollCalcPremium.CalculateToll(threeRideShare)}");
+            Console.WriteLine($"The toll for a fullVan is {tollCalcPremium.CalculateToll(fullVan)}");
 
-            Console.WriteLine($"The toll for an empty taxi is {tollCalc.CalculateToll(emptyTaxi)}");
-            Console.WriteLine($"The toll for a single fare taxi is {tollCalc.CalculateToll(singleFare)}");
-            Console.WriteLine($"The toll for a double fare taxi is {tollCalc.CalculateToll(doubleFare)}");
-            Console.WriteLine($"The toll for a full van taxi is {tollCalc.CalculateToll(fullVanPool)}");
+            Console.WriteLine($"The toll for an empty taxi is {tollCalcPremium.CalculateToll(emptyTaxi)}");
+            Console.WriteLine($"The toll for a single fare taxi is {tollCalcPremium.CalculateToll(singleFare)}");
+            Console.WriteLine($"The toll for a double fare taxi is {tollCalcPremium.CalculateToll(doubleFare)}");
+            Console.WriteLine($"The toll for a full van taxi is {tollCalcPremium.CalculateToll(fullVanPool)}");
 
-            Console.WriteLine($"The toll for a low-occupant bus is {tollCalc.CalculateToll(lowOccupantBus)}");
-            Console.WriteLine($"The toll for a regular bus is {tollCalc.CalculateToll(normalBus)}");
-            Console.WriteLine($"The toll for a bus is {tollCalc.CalculateToll(fullBus)}");
+            Console.WriteLine($"The toll for a low-occupant bus is {tollCalcPremium.CalculateToll(lowOccupantBus)}");
+            Console.WriteLine($"The toll for a regular bus is {tollCalcPremium.CalculateToll(normalBus)}");
+            Console.WriteLine($"The toll for a bus is {tollCalcPremium.CalculateToll(fullBus)}");
 
-            Console.WriteLine($"The toll for a truck is {tollCalc.CalculateToll(heavyTruck)}");
-            Console.WriteLine($"The toll for a truck is {tollCalc.CalculateToll(truck)}");
-            Console.WriteLine($"The toll for a truck is {tollCalc.CalculateToll(lightTruck)}");
+            Console.WriteLine($"The toll for a truck is {tollCalcPremium.CalculateToll(heavyTruck)}");
+            Console.WriteLine($"The toll for a truck is {tollCalcPremium.CalculateToll(truck)}");
+            Console.WriteLine($"The toll for a truck is {tollCalcPremium.CalculateToll(lightTruck)}");
 
             try
             {
-                tollCalc.CalculateToll("this will fail");
+                tollCalcPremium.CalculateToll("this will fail");
             }
             catch (ArgumentException)
             {
@@ -55,7 +58,7 @@ namespace toll_calculator
             }
             try
             {
-                tollCalc.CalculateToll(null!);
+                tollCalcPremium.CalculateToll(null!);
             }
             catch (ArgumentNullException)
             {
@@ -79,20 +82,20 @@ namespace toll_calculator
 
             foreach (var time in testTimes)
             {
-                Console.WriteLine($"Inbound premium at {time} is {tollCalc.PeakTimePremiumIfElse(time, true)}");
-                Console.WriteLine($"Outbound premium at {time} is {tollCalc.PeakTimePremiumIfElse(time, false)}");
+                Console.WriteLine($"Inbound premium at {time} is {tollCalcPremium.PeakTimeMethod(time, true)}");
+                Console.WriteLine($"Outbound premium at {time} is {tollCalcPremium.PeakTimeMethod(time, false)}");
             }
             Console.WriteLine("====================================================");
             foreach (var time in testTimes)
             {
-                Console.WriteLine($"Inbound premium at {time} is {tollCalc.PeakTimePremiumFull(time, true)}");
-                Console.WriteLine($"Outbound premium at {time} is {tollCalc.PeakTimePremiumFull(time, false)}");
+                Console.WriteLine($"Inbound premium at {time} is {tollCalcPremiumFall.PeakTimeMethod(time, true)}");
+                Console.WriteLine($"Outbound premium at {time} is {tollCalcPremiumFall.PeakTimeMethod(time, false)}");
             }
             Console.WriteLine("====================================================");
             foreach (var time in testTimes)
             {
-                Console.WriteLine($"Inbound premium at {time} is {tollCalc.PeakTimePremium(time, true)}");
-                Console.WriteLine($"Outbound premium at {time} is {tollCalc.PeakTimePremium(time, false)}");
+                Console.WriteLine($"Inbound premium at {time} is {tollCalcPremiumIfElse.PeakTimeMethod(time, true)}");
+                Console.WriteLine($"Outbound premium at {time} is {tollCalcPremiumIfElse.PeakTimeMethod(time, false)}");
             }
         }
     }

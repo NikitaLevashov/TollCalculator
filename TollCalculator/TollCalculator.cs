@@ -2,11 +2,25 @@
 using CommercialRegistration;
 using ConsumerVehicleRegistration;
 using LiveryRegistration;
+using TollCalculator.interfaces;
+using TollCalculator.Interfaces;
 
 namespace toll_calculator
 {
-    public class TollCalculator
+    public class TollCalculator : ICalculateToll
     {
+        public IPeakTime PeakTime { get; set; }
+
+        public TollCalculator(IPeakTime peakTime)
+        {
+            PeakTime = peakTime;
+        }
+
+        public decimal PeakTimeMethod(DateTime time, bool inbound)
+        {
+            return PeakTime.PeakTime(time, inbound);
+        }
+
         public decimal CalculateToll(object vehicle) =>
             vehicle switch
             {
@@ -38,117 +52,5 @@ namespace toll_calculator
                 null => throw new ArgumentNullException(nameof(vehicle))
             };
 
-        // <SnippetFinalTuplePattern>
-        public decimal PeakTimePremium(DateTime timeOfToll, bool inbound) =>
-            (IsWeekDay(timeOfToll), GetTimeBand(timeOfToll), inbound) switch
-            {
-                (true, TimeBand.Overnight, _) => 0.75m,
-                (true, TimeBand.Daytime, _) => 1.5m,
-                (true, TimeBand.MorningRush, true) => 2.0m,
-                (true, TimeBand.EveningRush, false) => 2.0m,
-                (_, _, _) => 1.0m,
-            };
-        // </SnippetFinalTuplePattern>
-
-        // <SnippetPremiumWithoutPattern>
-        public decimal PeakTimePremiumIfElse(DateTime timeOfToll, bool inbound)
-        {
-            if ((timeOfToll.DayOfWeek == DayOfWeek.Saturday) ||
-                (timeOfToll.DayOfWeek == DayOfWeek.Sunday))
-            {
-                return 1.0m;
-            }
-            else
-            {
-                int hour = timeOfToll.Hour;
-                if (hour < 6)
-                {
-                    return 0.75m;
-                }
-                else if (hour < 10)
-                {
-                    if (inbound)
-                    {
-                        return 2.0m;
-                    }
-                    else
-                    {
-                        return 1.0m;
-                    }
-                }
-                else if (hour < 16)
-                {
-                    return 1.5m;
-                }
-                else if (hour < 20)
-                {
-                    if (inbound)
-                    {
-                        return 1.0m;
-                    }
-                    else
-                    {
-                        return 2.0m;
-                    }
-                }
-                else // Overnight
-                {
-                    return 0.75m;
-                }
-            }
-        }
-        // </SnippetPremiumWithoutPattern>
-
-        // <SnippetTuplePatternOne>
-        public decimal PeakTimePremiumFull(DateTime timeOfToll, bool inbound) =>
-            (IsWeekDay(timeOfToll), GetTimeBand(timeOfToll), inbound) switch
-            {
-                (true, TimeBand.MorningRush, true) => 2.00m,
-                (true, TimeBand.MorningRush, false) => 1.00m,
-                (true, TimeBand.Daytime, true) => 1.50m,
-                (true, TimeBand.Daytime, false) => 1.50m,
-                (true, TimeBand.EveningRush, true) => 1.00m,
-                (true, TimeBand.EveningRush, false) => 2.00m,
-                (true, TimeBand.Overnight, true) => 0.75m,
-                (true, TimeBand.Overnight, false) => 0.75m,
-                (false, TimeBand.MorningRush, true) => 1.00m,
-                (false, TimeBand.MorningRush, false) => 1.00m,
-                (false, TimeBand.Daytime, true) => 1.00m,
-                (false, TimeBand.Daytime, false) => 1.00m,
-                (false, TimeBand.EveningRush, true) => 1.00m,
-                (false, TimeBand.EveningRush, false) => 1.00m,
-                (false, TimeBand.Overnight, true) => 1.00m,
-                (false, TimeBand.Overnight, false) => 1.00m,
-            };
-        // </SnippetTuplePatternOne>
-
-        // <SnippetIsWeekDay>
-        private static bool IsWeekDay(DateTime timeOfToll) =>
-            timeOfToll.DayOfWeek switch
-            {
-                DayOfWeek.Saturday => false,
-                DayOfWeek.Sunday => false,
-                _ => true
-            };
-        // </SnippetIsWeekDay>
-
-        // <SnippetGetTimeBand>
-        private enum TimeBand
-        {
-            MorningRush,
-            Daytime,
-            EveningRush,
-            Overnight
-        }
-
-        private static TimeBand GetTimeBand(DateTime timeOfToll) =>
-            timeOfToll.Hour switch
-            {
-                < 6 or > 19 => TimeBand.Overnight,
-                < 10 => TimeBand.MorningRush,
-                < 16 => TimeBand.Daytime,
-                _ => TimeBand.EveningRush,
-            };
-        // </SnippetGetTimeBand>
     }
 }
